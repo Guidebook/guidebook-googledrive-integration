@@ -29,12 +29,17 @@ def fetch_ssm_params():
         Name="/lambdas/googledrivewebhookreceiver/drive_folder_name", WithDecryption=False
     )["Parameter"]["Value"]
 
+    # The start page for a changes list request. Is set programatically by the lambda.
+    start_page = client.get_parameter(
+        Name="/lambdas/googledrivewebhookreceiver/start_page", WithDecryption=False
+    )["Parameter"]["Value"]
+
     service_account_credentials = client.get_parameter(
         Name="/lambdas/googledrivewebhookreceiver/service_account_credentials", WithDecryption=True
     )["Parameter"]["Value"]
     service_account_credentials = json.loads(service_account_credentials)
 
-    return api_key, guide_and_list_ids, drive_folder_name, service_account_credentials
+    return api_key, guide_and_list_ids, drive_folder_name, start_page, service_account_credentials
 
 
 def _export_file(service, file_id):

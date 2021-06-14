@@ -66,7 +66,7 @@ def load_file_data():
                 "target_object_id": pdf_response.json()["id"],
                 "target_content_type": "uri_resource.pdffile"
             }
-            response = builder_client.post(ink_post_url, link_post_data)
+            response = builder_client.post(link_post_url, link_post_data)
 
 
 if __name__ == "__main__":

@@ -10,7 +10,7 @@ class BuilderClient(object):
         self.builder_session = requests.Session()
         self.builder_session.headers.update({"Authorization": f"JWT {api_key}"})
 
-    def post(url, data=None, files=None, raise_error=True):
+    def post(self, url, data=None, files=None, raise_error=True):
         if data and files:
             response = self.builder_session.post(url, data=data, files=files)
         elif data:
@@ -22,7 +22,7 @@ class BuilderClient(object):
             response.raise_for_status()
         return response
 
-    def patch(url, data=None, files=None):
+    def patch(self, url, data=None, files=None):
         if data and files:
             response = self.builder_session.patch(url, data=data, files=files)
         elif data:
@@ -32,12 +32,12 @@ class BuilderClient(object):
 
         return response
 
-    def get(url):
+    def get(self, url):
         response = self.builder_session.get(url)
         response.raise_for_status()
 
         return response
 
-    def delete(url):
+    def delete(self, url):
         response = self.builder_session.delete(url)
         return response

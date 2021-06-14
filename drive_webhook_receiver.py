@@ -1,3 +1,5 @@
+import os
+import boto3
 import traceback
 from googleapiclient.discovery import build
 from google.oauth2 import service_account
@@ -13,7 +15,7 @@ def handle_google_drive_changes(event, context):
     try:
         # Fetch the Builder API key, the guide and custom list IDs that we want to update, 
         # the service account credentials, and the name of the folder in Google Drive
-        api_key, guide_and_list_ids, drive_folder_name, service_account_credentials = fetch_ssm_params()
+        api_key, guide_and_list_ids, drive_folder_name, start_page, service_account_credentials = fetch_ssm_params()
 
         builder_client = BuilderClient(api_key)
 
@@ -26,19 +28,20 @@ def handle_google_drive_changes(event, context):
         folder_id = folder_id_search.get('files', [])[0].get('id')
 
         # Check for recent changes
-        start_page = int(service.changes().getStartPageToken().execute()['startPageToken'])
         changes_response = service.changes().list(pageToken=start_page).execute()
-        if changes_response['changes'] == []:
-            changes_response = service.changes().list(pageToken=(start_page - 1)).execute()
+        changes = changes_response['changes']
+        while changes_response.get('nextPageToken', None):
+            changes_response = service.changes().list(pageToken=changes_response['nextPageToken']).execute()
+            changes.extend(changes_response['changes'])
 
         for guide_id, customlist_id in guide_and_list_ids:
-            for change in changes_response['changes']:
+            for change in changes:
                 # Get the file associated to the change in Google Drive
                 changed_file_id = change['fileId'] if change.get('fileId', None) else change['id']
                 changed_file = service.files().get(fileId=changed_file_id, fields='name, trashed, parents').execute()
 
-                # We can skip a change if it is not in the folder we are watching, or it is not a change of type `drive#change`
-                if change['kind'] == 'drive#file' or folder_id not in changed_file['parents']:
+                # We can skip a change if it is not in the folder we are watching
+                if folder_id not in changed_file['parents']:
                     continue
 
                 # Fetch the existing CustomListItem from Builder if it exists by filtering on the import_id field.
@@ -109,6 +112,17 @@ def handle_google_drive_changes(event, context):
                 elif custom_list_item and changed_file['trashed'] == True:
                     url = "https://beta.guidebook.com/open-api/v1/custom-list-items/{}/".format(custom_list_item['id'])
                     builder_client.delete(url)
+
+        # Set start page for next iteration
+        region = os.environ["AWS_REGION"]
+        client = boto3.client("ssm", region_name=region)
+        client.put_parameter(
+            Name="/lambdas/googledrivewebhookreceiver/start_page",
+            Value=changes_response['newStartPageToken'],
+            Type='String',
+            Overwrite=True
+        )
+
 
     except Exception as e:
         print(e)
