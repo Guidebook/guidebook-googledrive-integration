@@ -140,4 +140,4 @@ def _update_custom_list_item(builder_client, guide_id, custom_list_item):
     # Update the pdf file
     pdf_patch_url = "https://beta.guidebook.com/open-api/v1/pdfs/{}/".format(link['target_object_id'])
     with open(PDF_PATH, 'rb') as f:
-        pdf_response = builder_client.patch(pdf_patch_url, files={'pdf_file': f})
+        pdf_response = builder_client.patch(pdf_patch_url, data={'pdf_view_type': 'pdf'}, files={'pdf_file': f})
