@@ -30,6 +30,7 @@ class BuilderClient(object):
         else:
             response = self.builder_session.patch(url)
 
+        response.raise_for_status()
         return response
 
     def get(self, url):
@@ -40,4 +41,5 @@ class BuilderClient(object):
 
     def delete(self, url):
         response = self.builder_session.delete(url)
+        response.raise_for_status()
         return response

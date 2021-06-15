@@ -21,10 +21,10 @@ This project uses a scheduled Google Drive lambda to add, update and remove file
 
 ## Google Drive Setup
 1. Create a Google Cloud Platform project
-2. In IAM and Admin for this project, create a service account. This will be used for authentication.
+2. In IAM and Admin for this project, create a [service account](https://cloud.google.com/iam/docs/creating-managing-service-accounts). This will be used for authentication.
 3. Under the new service account, create a private JSON key. Download the key - the contents will be used in settings and parameter store to authenticate the requests to Google Drive.
 4. In APIs and Services for this project, enable the Google Drive API.
-5. In Google Drive, navigate to the folder that contains the files you want uploaded as CustomListItems to Builder. Share the folder with your service account.
+5. In Google Drive, navigate to the folder that contains the files you want uploaded to CustomListItems in Builder. Share the folder with your service account.
 
 ## Lambdas Setup
 **Steps to setup lambdas:**

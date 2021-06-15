@@ -5,6 +5,8 @@ import io
 import shutil
 from googleapiclient.http import MediaIoBaseDownload
 from constants import PDF_PATH
+from collections import namedtuple
+
 
 def fetch_ssm_params():
     """
@@ -39,7 +41,8 @@ def fetch_ssm_params():
     )["Parameter"]["Value"]
     service_account_credentials = json.loads(service_account_credentials)
 
-    return api_key, guide_and_list_ids, drive_folder_name, start_page, service_account_credentials
+    SSMParams = namedtuple('SSMParams', ['api_key', 'guide_and_list_ids', 'drive_folder_name', 'start_page', 'service_account_credentials'])
+    return SSMParams(api_key, guide_and_list_ids, drive_folder_name, start_page, service_account_credentials)
 
 
 def _export_file(service, file_id):
