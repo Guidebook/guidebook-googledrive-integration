@@ -46,7 +46,7 @@ def handle_google_drive_changes(event, context):
 
                 # Fetch the existing CustomListItem from Builder if it exists by filtering on the import_id field.
                 # This is needed to obtain the CustomListItem.id, which is required in the PATCH request
-                url = f"https://beta.guidebook.com/open-api/v1/custom-list-items?guide={guide_id}&custom_lists={customlist_id}&import_id={changed_file_id}"
+                url = f"https://builder.guidebook.com/open-api/v1/custom-list-items?guide={guide_id}&custom_lists={customlist_id}&import_id={changed_file_id}"
                 response = builder_client.get(url)
                 custom_list_item = response.json()['results'][0] if len(response.json()['results']) > 0 else None
 
@@ -63,7 +63,7 @@ def handle_google_drive_changes(event, context):
 
                 # If there is an existing custom list item and the google drive item is trashed, remove the item from Builder
                 elif custom_list_item and changed_file['trashed'] == True:
-                    url = "https://beta.guidebook.com/open-api/v1/custom-list-items/{}/".format(custom_list_item['id'])
+                    url = "https://builder.guidebook.com/open-api/v1/custom-list-items/{}/".format(custom_list_item['id'])
                     builder_client.delete(url)
 
         # Set start page for next iteration
@@ -89,7 +89,7 @@ def _create_custom_list_item(builder_client, guide_id, customlist_id, changed_fi
     Creates a new custom list item in Builder with a link to the PDF downloaded from google drive.
     """
     # Create the custom list item
-    custom_list_item_post_url = "https://beta.guidebook.com/open-api/v1/custom-list-items/"
+    custom_list_item_post_url = "https://builder.guidebook.com/open-api/v1/custom-list-items/"
     custom_list_item_post_data = {
         "import_id": changed_file_id,
         "guide": guide_id,
@@ -99,7 +99,7 @@ def _create_custom_list_item(builder_client, guide_id, customlist_id, changed_fi
     custom_list_item_response = builder_client.post(custom_list_item_post_url, custom_list_item_post_data)
 
     # Attach the custom list item to the custom list
-    item_relation_post_url = 'https://beta.guidebook.com/open-api/v1/custom-list-item-relations/'
+    item_relation_post_url = 'https://builder.guidebook.com/open-api/v1/custom-list-item-relations/'
     item_relation_data = {
        "custom_list": customlist_id,
        "custom_list_item": custom_list_item_response.json()["id"],
@@ -107,7 +107,7 @@ def _create_custom_list_item(builder_client, guide_id, customlist_id, changed_fi
     builder_client.post(item_relation_post_url, item_relation_data)
 
     # Create the pdf
-    pdf_post_url = 'https://beta.guidebook.com/open-api/v1/pdfs/'
+    pdf_post_url = 'https://builder.guidebook.com/open-api/v1/pdfs/'
     pdf_post_data = {
         "pdf_view_type": "pdf",
         "guide": guide_id,
@@ -117,7 +117,7 @@ def _create_custom_list_item(builder_client, guide_id, customlist_id, changed_fi
         pdf_response = builder_client.post(pdf_post_url, pdf_post_data, {'pdf_file': f})
 
     # Create the link from the custom list item to the pdf
-    link_post_url = 'https://beta.guidebook.com/open-api/v1/links/'
+    link_post_url = 'https://builder.guidebook.com/open-api/v1/links/'
     link_post_data = {
         "guide": guide_id,
         "source_object_id": custom_list_item_response.json()["id"],
@@ -133,11 +133,11 @@ def _update_custom_list_item(builder_client, guide_id, custom_list_item):
     Update the PDF of the existing custom list item in Builder with the downloaded file from google drive.
     """
     # Find the link associated to the custom list item and pdf
-    link_url = f"https://beta.guidebook.com/open-api/v1/links?guide={guide_id}&source_content_type=custom_list.customlistitem&source_object_id={custom_list_item['id']}&target_content_type=uri_resource.pdffile"
+    link_url = f"https://builder.guidebook.com/open-api/v1/links?guide={guide_id}&source_content_type=custom_list.customlistitem&source_object_id={custom_list_item['id']}&target_content_type=uri_resource.pdffile"
     response = builder_client.get(link_url)
     link = response.json()["results"][0]
 
     # Update the pdf file
-    pdf_patch_url = "https://beta.guidebook.com/open-api/v1/pdfs/{}/".format(link['target_object_id'])
+    pdf_patch_url = "https://builder.guidebook.com/open-api/v1/pdfs/{}/".format(link['target_object_id'])
     with open(PDF_PATH, 'rb') as f:
         pdf_response = builder_client.patch(pdf_patch_url, data={'pdf_view_type': 'pdf'}, files={'pdf_file': f})

@@ -30,7 +30,7 @@ def load_file_data():
             _export_file(service, item['id'])
 
             # Create the custom list item
-            custom_list_item_post_url = "https://beta.guidebook.com/open-api/v1/custom-list-items/"
+            custom_list_item_post_url = "https://builder.guidebook.com/open-api/v1/custom-list-items/"
             custom_list_item_post_data = {
                 "import_id": item["id"],
                 "guide": guide_id,
@@ -40,7 +40,7 @@ def load_file_data():
             custom_list_item_response = builder_client.post(custom_list_item_post_url, custom_list_item_post_data)
 
             # Attach the custom list item to the custom list
-            item_relation_post_url = 'https://beta.guidebook.com/open-api/v1/custom-list-item-relations/'
+            item_relation_post_url = 'https://builder.guidebook.com/open-api/v1/custom-list-item-relations/'
             item_relation_data = {
                "custom_list": customlist_id,
                "custom_list_item": custom_list_item_response.json()["id"],
@@ -48,7 +48,7 @@ def load_file_data():
             builder_client.post(item_relation_post_url, item_relation_data)
 
             # Create the pdf
-            pdf_post_url = 'https://beta.guidebook.com/open-api/v1/pdfs/'
+            pdf_post_url = 'https://builder.guidebook.com/open-api/v1/pdfs/'
             pdf_post_data = {
                 "pdf_view_type": "pdf",
                 "guide": guide_id,
@@ -58,7 +58,7 @@ def load_file_data():
                 pdf_response = builder_client.post(pdf_post_url, pdf_post_data, {'pdf_file': f})
 
             # Create the link from the custom list item to the pdf
-            link_post_url = 'https://beta.guidebook.com/open-api/v1/links/'
+            link_post_url = 'https://builder.guidebook.com/open-api/v1/links/'
             link_post_data = {
                 "guide": guide_id,
                 "source_object_id": custom_list_item_response.json()["id"],
