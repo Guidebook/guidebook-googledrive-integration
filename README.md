@@ -39,5 +39,7 @@ The lambda code is contained in: `drive_webhook_receiver.py`
 | `/lambdas/googledrivewebhookreceiver/api_key` | SecureString| Your Builder API key |
 | `/lambdas/googledrivewebhookreceiver/guide_and_list_ids` | String | List of guide and custom list ids to update in Builder, ex: (<guide1_id>, <list1_id>), (<guide2_id>, <list2_id>)|
 | `/lambdas/googledrivewebhookreceiver/service_account_credentials` | SecureString | The credentials dictionary for your service account generated for the project. |
+| `/lambdas/googledrivewebhookreceiver/start_page` | String| The starting page of changes to watch in Google Drive. |
+| `/lambdas/googledrivewebhookreceiver/drive_folder_name` | String| The name of the folder to watch in Google Drive. |
 
 5. Deploy the lambda.
