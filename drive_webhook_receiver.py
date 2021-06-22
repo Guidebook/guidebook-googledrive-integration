@@ -59,7 +59,7 @@ def handle_google_drive_changes(event, context):
                 # with the changes in Builder
                 elif custom_list_item and changed_file['trashed'] == False:
                     _export_file(service, changed_file_id)
-                    _update_custom_list_item(builder_client, guide_id, custom_list_item)
+                    _update_custom_list_item(builder_client, guide_id, custom_list_item, changed_file)
 
                 # If there is an existing custom list item and the google drive item is trashed, remove the item from Builder
                 elif custom_list_item and changed_file['trashed'] == True:
@@ -128,10 +128,18 @@ def _create_custom_list_item(builder_client, guide_id, customlist_id, changed_fi
     response = builder_client.post(link_post_url, link_post_data)
 
 
-def _update_custom_list_item(builder_client, guide_id, custom_list_item):
+def _update_custom_list_item(builder_client, guide_id, custom_list_item, changed_file):
     """
     Update the PDF of the existing custom list item in Builder with the downloaded file from google drive.
     """
+    # Update the custom list item
+    custom_list_item_patch_url = "https://builder.guidebook.com/open-api/v1/custom-list-items/{}/".format(custom_list_item['id'])
+    custom_list_item_patch_data = {
+        "name": changed_file['name'],
+        "description_html": "A custom list item with a link to {}".format(changed_file['name'])
+    }
+    custom_list_item_response = builder_client.patch(custom_list_item_patch_url, custom_list_item_patch_data)
+
     # Find the link associated to the custom list item and pdf
     link_url = f"https://builder.guidebook.com/open-api/v1/links?guide={guide_id}&source_content_type=custom_list.customlistitem&source_object_id={custom_list_item['id']}&target_content_type=uri_resource.pdffile"
     response = builder_client.get(link_url)
