@@ -41,7 +41,7 @@ def handle_google_drive_changes(event, context):
                 changed_file = service.files().get(fileId=changed_file_id, fields='name, trashed, parents').execute()
 
                 # We can skip a change if it is not in the folder we are watching
-                if folder_id not in changed_file['parents']:
+                if folder_id not in changed_file.get('parents', []):
                     continue
 
                 # Fetch the existing CustomListItem from Builder if it exists by filtering on the import_id field.
