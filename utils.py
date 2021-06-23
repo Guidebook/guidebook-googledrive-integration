@@ -49,7 +49,7 @@ def _export_file(service, file_id):
     """
     Util for exporting a file from Google Drive as a pdf
     """
-    request = service.files().export(fileId=file_id, mimeType='application/pdf', fields='name')
+    request = service.files().get_media(fileId=file_id, fields='name')
     fh = io.BytesIO()
     downloader = MediaIoBaseDownload(fh, request)
     done = False
