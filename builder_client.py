@@ -26,7 +26,7 @@ class BuilderClient(object):
         if data and files:
             response = self.builder_session.patch(url, data=data, files=files)
         elif data:
-            response = self.builder_session.patch(url, data=files)
+            response = self.builder_session.patch(url, data=data)
         else:
             response = self.builder_session.patch(url)
 
