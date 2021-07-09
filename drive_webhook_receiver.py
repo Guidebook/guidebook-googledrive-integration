@@ -123,7 +123,8 @@ def _create_custom_list_item(builder_client, guide_id, customlist_id, changed_fi
         "source_object_id": custom_list_item_response.json()["id"],
         "source_content_type": "custom_list.customlistitem",
         "target_object_id": pdf_response.json()["id"],
-        "target_content_type": "uri_resource.pdffile"
+        "target_content_type": "uri_resource.pdffile",
+        "_title": changed_file['name']
     }
     response = builder_client.post(link_post_url, link_post_data)
 
