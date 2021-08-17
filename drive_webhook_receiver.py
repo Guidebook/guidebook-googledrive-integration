@@ -3,7 +3,7 @@ import boto3
 import traceback
 from googleapiclient.discovery import build
 from google.oauth2 import service_account
-from utils import fetch_ssm_params, _export_file
+from utils import fetch_ssm_params, _export_file, _alphabetize_all_items
 from builder_client import BuilderClient
 from constants import PDF_PATH, SCOPES
 
@@ -153,23 +153,3 @@ def _update_custom_list_item(builder_client, guide_id, custom_list_item, changed
     pdf_patch_url = "https://builder.guidebook.com/open-api/v1/pdfs/{}/".format(link['target_object_id'])
     with open(PDF_PATH, 'rb') as f:
         pdf_response = builder_client.patch(pdf_patch_url, data={'pdf_view_type': 'pdf'}, files={'pdf_file': f})
-
-
-def _alphabetize_all_items(builder_client, guide_id, customlist_id):
-    """
-    Pull all items from the custom list, alphabetize, and adjust ranks accordingly.
-    """
-    items_url = f"https://builder.guidebook.com/open-api/v1/custom-list-items?guide={guide_id}&custom_list={customlist_id}"
-    response = builder_client.get(items_url)
-    sorted_list = sorted(response.json()["results"], key=lambda x: x['name'])
-
-    rank = 0
-    for item in sorted_list:
-        item_patch_url = "https://builder.guidebook.com/open-api/v1/custom-list-items/{}/".format(item['id'])
-        builder_client.patch(item_patch_url, data={'rank': rank})
-        rank += 1
-
-
-
-
-
