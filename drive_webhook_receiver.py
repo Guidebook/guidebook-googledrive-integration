@@ -127,6 +127,7 @@ def _create_custom_list_item(builder_client, guide_id, customlist_id, changed_fi
         "_title": changed_file['name']
     }
     response = builder_client.post(link_post_url, link_post_data)
+    _alphabetize_all_items(builder_client, guide_id, customlist_id)
 
 
 def _update_custom_list_item(builder_client, guide_id, custom_list_item, changed_file):
@@ -134,12 +135,14 @@ def _update_custom_list_item(builder_client, guide_id, custom_list_item, changed
     Update the PDF of the existing custom list item in Builder with the downloaded file from google drive.
     """
     # Update the custom list item
-    custom_list_item_patch_url = "https://builder.guidebook.com/open-api/v1/custom-list-items/{}/".format(custom_list_item['id'])
-    custom_list_item_patch_data = {
-        "name": changed_file['name'],
-        "description_html": "A custom list item with a link to {}".format(changed_file['name'])
-    }
-    custom_list_item_response = builder_client.patch(custom_list_item_patch_url, custom_list_item_patch_data)
+    if custom_list_item['name'] != changed_file['name']:
+        custom_list_item_patch_url = "https://builder.guidebook.com/open-api/v1/custom-list-items/{}/".format(custom_list_item['id'])
+        custom_list_item_patch_data = {
+            "name": changed_file['name'],
+            "description_html": "A custom list item with a link to {}".format(changed_file['name'])
+        }
+        custom_list_item_response = builder_client.patch(custom_list_item_patch_url, custom_list_item_patch_data)
+        _alphabetize_all_items(builder_client, guide_id, custom_list_item['custom_lists'][0])
 
     # Find the link associated to the custom list item and pdf
     link_url = f"https://builder.guidebook.com/open-api/v1/links?guide={guide_id}&source_content_type=custom_list.customlistitem&source_object_id={custom_list_item['id']}&target_content_type=uri_resource.pdffile"
@@ -150,3 +153,23 @@ def _update_custom_list_item(builder_client, guide_id, custom_list_item, changed
     pdf_patch_url = "https://builder.guidebook.com/open-api/v1/pdfs/{}/".format(link['target_object_id'])
     with open(PDF_PATH, 'rb') as f:
         pdf_response = builder_client.patch(pdf_patch_url, data={'pdf_view_type': 'pdf'}, files={'pdf_file': f})
+
+
+def _alphabetize_all_items(builder_client, guide_id, customlist_id):
+    """
+    Pull all items from the custom list, alphabetize, and adjust ranks accordingly.
+    """
+    items_url = f"https://builder.guidebook.com/open-api/v1/custom-list-items?guide={guide_id}&custom_list={customlist_id}"
+    response = builder_client.get(items_url)
+    sorted_list = sorted(response.json()["results"], key=lambda x: x['name'])
+
+    rank = 0
+    for item in sorted_list:
+        item_patch_url = "https://builder.guidebook.com/open-api/v1/custom-list-items/{}/".format(item['id'])
+        builder_client.patch(item_patch_url, data={'rank': rank})
+        rank += 1
+
+
+
+
+
