@@ -2,7 +2,7 @@ import settings
 import json
 from googleapiclient.discovery import build
 from google.oauth2 import service_account
-from utils import _export_file
+from utils import _export_file, _alphabetize_all_items
 from builder_client import BuilderClient
 from constants import PDF_PATH, SCOPES
 
@@ -69,6 +69,7 @@ def load_file_data():
             }
             response = builder_client.post(link_post_url, link_post_data)
 
+        _alphabetize_all_items(builder_client, guide_id, customlist_id)
 
 if __name__ == "__main__":
     load_file_data()
