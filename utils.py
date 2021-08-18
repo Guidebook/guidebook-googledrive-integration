@@ -71,6 +71,8 @@ def _alphabetize_all_items(builder_client, guide_id, customlist_id):
 
     rank = 0
     for item in sorted_list:
-        item_patch_url = "https://builder.guidebook.com/open-api/v1/custom-list-items/{}/".format(item['id'])
-        builder_client.patch(item_patch_url, data={'rank': rank})
+        relation_url = f"https://builder.guidebook.com/open-api/v1/custom-list-item-relations/?custom_list_item={item['id']}&custom_list={customlist_id}"
+        cutom_list_item_relation = builder_client.get(relation_url).json()['results'][0]
+        relation_patch_url = f"https://builder.guidebook.com/open-api/v1/custom-list-item-relations/{cutom_list_item_relation['id']}/"
+        builder_client.patch(relation_patch_url, data={'rank': rank})
         rank += 1
