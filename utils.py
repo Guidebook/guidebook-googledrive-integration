@@ -59,3 +59,18 @@ def _export_file(service, file_id):
     fh.seek(0)
     with open(PDF_PATH, 'wb') as f:
         shutil.copyfileobj(fh, f, length=131072)
+
+
+def _alphabetize_all_items(builder_client, guide_id, customlist_id):
+    """
+    Pull all items from the custom list, alphabetize, and adjust ranks accordingly.
+    """
+    items_url = f"https://builder.guidebook.com/open-api/v1/custom-list-items?guide={guide_id}&custom_list={customlist_id}"
+    response = builder_client.get(items_url)
+    sorted_list = sorted(response.json()["results"], key=lambda x: x['name'])
+
+    rank = 0
+    for item in sorted_list:
+        item_patch_url = "https://builder.guidebook.com/open-api/v1/custom-list-items/{}/".format(item['id'])
+        builder_client.patch(item_patch_url, data={'rank': rank})
+        rank += 1
